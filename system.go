@@ -2,6 +2,7 @@ package sound
 
 import (
 	"runtime"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	resource "github.com/quasilyte/ebitengine-resource"
@@ -25,6 +26,8 @@ type System struct {
 
 type PlayOptions struct {
 	Volume float64
+
+	Position time.Duration
 }
 
 func (sys *System) Init(a *audio.Context, l *resource.Loader) {
@@ -96,7 +99,7 @@ func (sys *System) SetGroupVolume(groupID uint, multiplier float64) {
 }
 
 func (sys *System) PlaySoundWithOptions(id resource.AudioID, opts PlayOptions) resource.Audio {
-	return sys.playSound(id, opts.Volume)
+	return sys.playSound(id, opts)
 }
 
 // PlaySound is a shorthand for [PlaySoundWithOptions](id, {Volume: 1.0}).
@@ -109,7 +112,7 @@ func (sys *System) PlaySound(id resource.AudioID) resource.Audio {
 	})
 }
 
-func (sys *System) playSound(id resource.AudioID, vol float64) resource.Audio {
+func (sys *System) playSound(id resource.AudioID, opts PlayOptions) resource.Audio {
 	res := sys.loader.LoadWAV(id)
 
 	if sys.soundMap.IsSet(uint(id)) {
@@ -117,10 +120,12 @@ func (sys *System) playSound(id resource.AudioID, vol float64) resource.Audio {
 	}
 	sys.soundMap.Set(uint(id))
 
-	finalVolume := sys.calculateVolume(res, vol)
+	finalVolume := sys.calculateVolume(res, opts.Volume)
 	if finalVolume != 0 {
 		res.Player.SetVolume(finalVolume)
-		res.Player.Rewind()
+		// Rewind() calls SetPosition(0) internally anyway,
+		// so there is no gain in branching here between Rewind and SetPosition.
+		res.Player.SetPosition(opts.Position)
 		res.Player.Play()
 	}
 	return res
