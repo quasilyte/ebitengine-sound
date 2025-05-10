@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.6.7
-	github.com/quasilyte/ebitengine-resource v0.5.0
+	github.com/quasilyte/ebitengine-resource v0.5.1-0.20250510103547-c1afcd40eb1f
 )
 
 require (

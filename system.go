@@ -113,7 +113,7 @@ func (sys *System) PlaySound(id resource.AudioID) resource.Audio {
 }
 
 func (sys *System) playSound(id resource.AudioID, opts PlayOptions) resource.Audio {
-	res := sys.loader.LoadWAV(id)
+	res := sys.loader.LoadAudio(id)
 
 	if sys.soundMap.IsSet(uint(id)) {
 		return res
