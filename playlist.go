@@ -46,6 +46,13 @@ func NewPlaylist(sys *System) *Playlist {
 	return pl
 }
 
+// Reset clears all sounds added via [Add] and [AddWithOptions],
+// but it will not stop the current player.
+// Use [Stop] if you want the current player to be discarded.
+func (pl *Playlist) Reset() {
+	pl.list = pl.list[:0]
+}
+
 func (pl *Playlist) AddWithOptions(id resource.AudioID, opts PlayOptions) {
 	pl.list = append(pl.list, audioWithOptions{
 		id:   id,
@@ -90,6 +97,17 @@ func (pl *Playlist) SetSilenceDuration(seconds float64) {
 	pl.silence = seconds
 }
 
+// Stop cancels the currently playing sound.
+//
+// If playlist is not paused, the next [Update] call might select
+// the next sound to play.
+func (pl *Playlist) Stop() {
+	if pl.current.Player == nil {
+		return
+	}
+	pl.current.Player.Pause()
+}
+
 func (pl *Playlist) Update(delta float64) {
 	if len(pl.list) == 0 {
 		return
@@ -100,8 +118,6 @@ func (pl *Playlist) Update(delta float64) {
 
 	if pl.currentIndex == -1 {
 		pl.currentIndex = pl.SelectFunc(pl.currentIndex)
-		// el := pl.list[pl.currentIndex]
-		// pl.current = pl.sys.PlaySoundWithOptions(el.id, el.opts)
 	}
 
 	if pl.current.Player != nil && pl.current.Player.IsPlaying() {
