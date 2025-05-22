@@ -81,10 +81,12 @@ func (pl *Playlist) SetPaused(paused bool) {
 	if paused {
 		pl.current.Player.Pause()
 	} else {
-		vol := pl.sys.calculateVolume(pl.current, pl.list[pl.currentIndex].opts.Volume)
-		if vol != 0 {
-			pl.current.Player.SetVolume(vol)
-			pl.current.Player.Play()
+		if pl.currentIndex < len(pl.list) {
+			vol := pl.sys.calculateVolume(pl.current, pl.list[pl.currentIndex].opts.Volume)
+			if vol != 0 {
+				pl.current.Player.SetVolume(vol)
+				pl.current.Player.Play()
+			}
 		}
 	}
 }
@@ -116,10 +118,6 @@ func (pl *Playlist) Update(delta float64) {
 		return
 	}
 
-	if pl.currentIndex == -1 {
-		pl.currentIndex = pl.SelectFunc(pl.currentIndex)
-	}
-
 	if pl.current.Player != nil && pl.current.Player.IsPlaying() {
 		return
 	}
@@ -129,6 +127,7 @@ func (pl *Playlist) Update(delta float64) {
 		return
 	}
 	pl.nextDelay = pl.silence
+	pl.currentIndex = pl.SelectFunc(pl.currentIndex)
 	el := pl.list[pl.currentIndex]
 	pl.current = pl.sys.PlaySoundWithOptions(el.id, el.opts)
 }
