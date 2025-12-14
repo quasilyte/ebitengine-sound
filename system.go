@@ -112,6 +112,11 @@ func (sys *System) PlaySound(id resource.AudioID) resource.Audio {
 	})
 }
 
+// SoundIsPlaying reports whether the ID's associated player is currently busy playing it.
+func (sys *System) SoundIsPlaying(id resource.AudioID) bool {
+	return sys.loader.LoadAudio(id).Player.IsPlaying()
+}
+
 func (sys *System) playSound(id resource.AudioID, opts PlayOptions) resource.Audio {
 	res := sys.loader.LoadAudio(id)
 
